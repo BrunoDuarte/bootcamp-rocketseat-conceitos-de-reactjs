@@ -1,26 +1,48 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
+import api from './services/api'
 
 import "./styles.css";
 
 function App() {
+  const [repositories, setRepository] = useState([])
+
+  useEffect(() => {
+    api.get('repositories').then(response => {
+      setRepository(response.data)
+    })
+  }, [])
+
   async function handleAddRepository() {
-    // TODO
+    const response = await api.post('repositories', {
+      title: `Desafio Node.js - ${Date.now()}`,
+      url: "https://github.com/Rocketseat/bootcamp-gostack-desafios/tree/master/desafio-conceitos-nodejs",
+      techs: ["Node.js", "React", "React Native"]
+    })
+
+    const repository = response.data
+    setRepository([...repositories, repository])
+    console.log(repositories)
   }
 
   async function handleRemoveRepository(id) {
-    // TODO
+    console.log(id)
+    const response = await api.delete('repositories/' + id)
+    api.get('repositories').then(response => {
+      setRepository(response.data)
+    })
+    return response
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
-        <li>
-          Repositório 1
-
-          <button onClick={() => handleRemoveRepository(1)}>
+        {repositories.map(repository => 
+        <li key={repository.id}>
+          {repository.title}
+          <button onClick={() => handleRemoveRepository(repository.id)}>
             Remover
           </button>
-        </li>
+        </li>)}
       </ul>
 
       <button onClick={handleAddRepository}>Adicionar</button>
